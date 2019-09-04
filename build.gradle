@@ -110,7 +110,7 @@ task createAojdkFixedDockerFile (type: Dockerfile) {
 
 task buildAOjdkFixedImage(type: DockerBuildImage) {
 	dependsOn createAojdkFixedDockerFile
-	tags.add('adoptopenjdk-bad')
+	tags.add('adoptopenjdk-fixed')
 }
 
 task createAOjdkFixedContainer(type: DockerCreateContainer) {
