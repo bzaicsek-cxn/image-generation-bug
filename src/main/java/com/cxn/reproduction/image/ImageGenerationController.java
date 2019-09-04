@@ -32,9 +32,9 @@ public class ImageGenerationController {
 	@GetMapping(produces=MediaType.IMAGE_PNG_VALUE)
 	public @ResponseBody byte[] genrateImage(
 				@RequestParam(name="text",  defaultValue="test") @NotBlank         String text,
-				@RequestParam(name="red",   defaultValue="255")  @Min(0) @Max(255) int red,
-				@RequestParam(name="green", defaultValue="160")  @Min(0) @Max(255) int green,
-				@RequestParam(name="blue",  defaultValue="0")    @Min(0) @Max(255) int blue
+				@RequestParam(name="red",   defaultValue="255")  @Min(0) @Max(255) int    red,
+				@RequestParam(name="green", defaultValue="160")  @Min(0) @Max(255) int    green,
+				@RequestParam(name="blue",  defaultValue="0")    @Min(0) @Max(255) int    blue
 			) throws Exception {
 		BufferedImage image = new BufferedImage(WIDTH_HEIGHT, WIDTH_HEIGHT, BufferedImage.TYPE_INT_RGB);
 		Graphics g = image.createGraphics();
