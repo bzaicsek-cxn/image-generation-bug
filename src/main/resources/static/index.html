@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	 <head>
+		 <title>Demo</title>
+		 <script type="text/javascript">
+		    function addImage() {
+				var img = document.createElement('img');
+				img.src='/generate?text='+document.getElementById('text').value
+						+"&red="+document.getElementById('red').value
+						+"&green="+document.getElementById('green').value
+						+"&blue="+document.getElementById('blue').value
+				document.getElementById('imgs').appendChild(img)
+			}
+		 </script>
+	 </head>
+	 <body>
+		 this renders the image with the text
+		 <form action="/generate" method="GET">
+			 text:  <input type="text"   value="test" name="text" id="text"                    /> <br />
+			 red:   <input type="number" value="255" min="0" max="255" name="red"   id="red"   /> <br />
+			 green: <input type="number" value="160" min="0" max="255" name="green" id="green" /> <br />
+			 blue:  <input type="number" value="0"   min="0" max="255" name="blue"  id="blue"  /> <br />
+			 <input type="submit" value="Submit">
+		 </form>
+		 <button onclick="addImage()">js_generate</button>
+		 <div id="imgs"></div>
+	 </body>
+</html>

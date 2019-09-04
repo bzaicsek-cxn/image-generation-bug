@@ -1,0 +1,130 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.7.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+	id 'com.bmuschko.docker-remote-api' version '4.10.0'
+}
+
+group = 'com.cxn.reproduction'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+// DOCKER FROM THIS POINT
+
+import com.bmuschko.gradle.docker.tasks.image.*
+import com.bmuschko.gradle.docker.tasks.container.*
+
+task copyJar(type: Copy) {
+	dependsOn build
+	from 'build/libs/'
+	include '*.jar'
+	into 'build/docker'
+	rename '.*', 'app.jar'
+}
+
+// Open JDK
+
+task createOpenjdkDockerfile (type: Dockerfile) {
+	from ('openjdk:8')
+	copyFile('./app.jar', '/app.jar')
+	exposePort(8080)
+	entryPoint('java')
+	defaultCommand('-jar', '/app.jar')
+	dependsOn copyJar
+}
+
+task buildOjdkImage(type: DockerBuildImage) {
+	dependsOn createOpenjdkDockerfile
+	tags.add('openjdk-works')
+}
+
+task createOjdkContainer(type: DockerCreateContainer) {
+	dependsOn buildOjdkImage
+	targetImageId buildOjdkImage.getImageId()
+	portBindings = ['8080:8080']
+	autoRemove=true
+}
+
+task startWithOpenJdk(type: DockerStartContainer) {
+	dependsOn createOjdkContainer
+	targetContainerId createOjdkContainer.getContainerId()
+	group 'demo'
+	doLast {
+		println 'openjdk image is available on 8080'
+	}
+}
+
+// AdoptOpenJDK bad
+
+task createAojdkBadDockerFile (type: Dockerfile) {
+	from ('adoptopenjdk:8-jdk-hotspot')
+	copyFile('./app.jar', '/app.jar')
+	exposePort(8080)
+	entryPoint('java')
+	defaultCommand('-jar', '/app.jar')
+	dependsOn copyJar
+}
+
+task buildAOjdkBadImage(type: DockerBuildImage) {
+	dependsOn createAojdkBadDockerFile
+	tags.add('adoptopenjdk-bad')
+}
+
+task createAOjdkBadContainer(type: DockerCreateContainer) {
+	dependsOn buildAOjdkBadImage
+	targetImageId buildAOjdkBadImage.getImageId()
+	portBindings = ['8081:8080']
+	autoRemove=true
+}
+
+task startWithAdoptOpenJdkBad(type: DockerStartContainer) {
+	dependsOn createAOjdkBadContainer
+	targetContainerId createAOjdkBadContainer.getContainerId()
+	group 'demo'
+	doLast {
+		println 'bad AdoptOpenJDK image is available on 8081'
+	}
+}
+
+// AdoptOpenJDK fixed
+
+task createAojdkFixedDockerFile (type: Dockerfile) {
+	from ('adoptopenjdk:8-jdk-hotspot')
+	copyFile('./app.jar', '/app.jar')
+	runCommand('apt update')
+	runCommand('apt install -y libfontconfig1')
+	exposePort(8080)
+	entryPoint('java')
+	defaultCommand('-jar', '/app.jar')
+	dependsOn copyJar
+}
+
+task buildAOjdkFixedImage(type: DockerBuildImage) {
+	dependsOn createAojdkFixedDockerFile
+	tags.add('adoptopenjdk-bad')
+}
+
+task createAOjdkFixedContainer(type: DockerCreateContainer) {
+	dependsOn buildAOjdkFixedImage
+	targetImageId buildAOjdkFixedImage.getImageId()
+	portBindings = ['8082:8080']
+	autoRemove=true
+}
+
+task startWithAdoptOpenJdkFixed(type: DockerStartContainer) {
+	dependsOn createAOjdkFixedContainer
+	targetContainerId createAOjdkFixedContainer.getContainerId()
+	group 'demo'
+	doLast {
+		println 'fixed AdoptOpenJDK image is available on 8082'
+	}
+}
